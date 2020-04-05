@@ -3,7 +3,7 @@ package com.theagilemonkeys.service.dto;
 import com.theagilemonkeys.config.Constants;
 
 import com.theagilemonkeys.domain.Authority;
-import com.theagilemonkeys.domain.User;
+import com.theagilemonkeys.domain.UserEntity;
 
 import javax.validation.constraints.*;
 import java.time.Instant;
@@ -54,7 +54,7 @@ public class UserDTO {
         // Empty constructor needed for Jackson.
     }
 
-    public UserDTO(User user) {
+    public UserDTO(UserEntity user) {
         this.id = user.getId();
         this.login = user.getLogin();
         this.firstName = user.getFirstName();

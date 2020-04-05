@@ -3,7 +3,7 @@ package com.theagilemonkeys.service;
 import com.theagilemonkeys.CrmApp;
 import com.theagilemonkeys.config.Constants;
 import com.theagilemonkeys.config.TestSecurityConfiguration;
-import com.theagilemonkeys.domain.User;
+import com.theagilemonkeys.domain.UserEntity;
 import com.theagilemonkeys.repository.UserRepository;
 import com.theagilemonkeys.security.AuthoritiesConstants;
 import com.theagilemonkeys.service.dto.UserDTO;
@@ -53,13 +53,13 @@ public class UserServiceIT {
     @Autowired
     private UserService userService;
 
-    private User user;
+    private UserEntity user;
 
     private Map<String, Object> userDetails;
 
     @BeforeEach
     public void init() {
-        user = new User();
+        user = new UserEntity();
         user.setLogin(DEFAULT_LOGIN);
         user.setActivated(true);
         user.setEmail(DEFAULT_EMAIL);

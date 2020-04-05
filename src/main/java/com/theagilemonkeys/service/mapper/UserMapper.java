@@ -1,7 +1,7 @@
 package com.theagilemonkeys.service.mapper;
 
 import com.theagilemonkeys.domain.Authority;
-import com.theagilemonkeys.domain.User;
+import com.theagilemonkeys.domain.UserEntity;
 import com.theagilemonkeys.service.dto.UserDTO;
 
 import org.springframework.stereotype.Service;
@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Mapper for the entity {@link User} and its DTO called {@link UserDTO}.
+ * Mapper for the entity {@link UserEntity} and its DTO called {@link UserDTO}.
  *
  * Normal mappers are generated using MapStruct, this one is hand-coded as MapStruct
  * support is still in beta, and requires a manual step with an IDE.
@@ -18,29 +18,29 @@ import java.util.stream.Collectors;
 @Service
 public class UserMapper {
 
-    public List<UserDTO> usersToUserDTOs(List<User> users) {
+    public List<UserDTO> usersToUserDTOs(List<UserEntity> users) {
         return users.stream()
             .filter(Objects::nonNull)
             .map(this::userToUserDTO)
             .collect(Collectors.toList());
     }
 
-    public UserDTO userToUserDTO(User user) {
+    public UserDTO userToUserDTO(UserEntity user) {
         return new UserDTO(user);
     }
 
-    public List<User> userDTOsToUsers(List<UserDTO> userDTOs) {
+    public List<UserEntity> userDTOsToUsers(List<UserDTO> userDTOs) {
         return userDTOs.stream()
             .filter(Objects::nonNull)
             .map(this::userDTOToUser)
             .collect(Collectors.toList());
     }
 
-    public User userDTOToUser(UserDTO userDTO) {
+    public UserEntity userDTOToUser(UserDTO userDTO) {
         if (userDTO == null) {
             return null;
         } else {
-            User user = new User();
+            UserEntity user = new UserEntity();
             user.setId(userDTO.getId());
             user.setLogin(userDTO.getLogin());
             user.setFirstName(userDTO.getFirstName());
@@ -70,11 +70,11 @@ public class UserMapper {
         return authorities;
     }
 
-    public User userFromId(String id) {
+    public UserEntity userFromId(String id) {
         if (id == null) {
             return null;
         }
-        User user = new User();
+        UserEntity user = new UserEntity();
         user.setId(id);
         return user;
     }

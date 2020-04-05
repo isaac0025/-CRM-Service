@@ -2,11 +2,12 @@ package com.theagilemonkeys.service;
 
 import com.theagilemonkeys.config.Constants;
 import com.theagilemonkeys.domain.Authority;
-import com.theagilemonkeys.domain.User;
+import com.theagilemonkeys.domain.UserEntity;
 import com.theagilemonkeys.repository.AuthorityRepository;
 import com.theagilemonkeys.repository.UserRepository;
 import com.theagilemonkeys.security.SecurityUtils;
 import com.theagilemonkeys.service.dto.UserDTO;
+import com.theagilemonkeys.service.mapper.UserMapper;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,11 +39,14 @@ public class UserService {
     private final AuthorityRepository authorityRepository;
 
     private final CacheManager cacheManager;
+    
+    private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository, AuthorityRepository authorityRepository, CacheManager cacheManager) {
+    public UserService(UserRepository userRepository, AuthorityRepository authorityRepository, CacheManager cacheManager, UserMapper userMapper) {
         this.userRepository = userRepository;
         this.authorityRepository = authorityRepository;
         this.cacheManager = cacheManager;
+        this.userMapper = userMapper;
     }
 
     /**
@@ -120,17 +124,17 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> getUserWithAuthoritiesByLogin(String login) {
+    public Optional<UserEntity> getUserWithAuthoritiesByLogin(String login) {
         return userRepository.findOneWithAuthoritiesByLogin(login);
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> getUserWithAuthorities(Long id) {
+    public Optional<UserEntity> getUserWithAuthorities(Long id) {
         return userRepository.findOneWithAuthoritiesById(id);
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> getUserWithAuthorities() {
+    public Optional<UserEntity> getUserWithAuthorities() {
         return SecurityUtils.getCurrentUserLogin().flatMap(userRepository::findOneWithAuthoritiesByLogin);
     }
 
@@ -142,7 +146,7 @@ public class UserService {
         return authorityRepository.findAll().stream().map(Authority::getName).collect(Collectors.toList());
     }
 
-    private User syncUserWithIdP(Map<String, Object> details, User user) {
+    private UserEntity syncUserWithIdP(Map<String, Object> details, UserEntity user) {
         // save authorities in to sync user roles/groups between IdP and JHipster's local database
         Collection<String> dbAuthorities = getAuthorities();
         Collection<String> userAuthorities =
@@ -156,7 +160,7 @@ public class UserService {
             }
         }
         // save account in to sync users between IdP and JHipster's local database
-        Optional<User> existingUser = userRepository.findOneByLogin(user.getLogin());
+        Optional<UserEntity> existingUser = userRepository.findOneByLogin(user.getLogin());
         if (existingUser.isPresent()) {
             // if IdP sends last updated information, use it to determine if an update should happen
             if (details.get("updated_at") != null) {
@@ -197,7 +201,7 @@ public class UserService {
         } else {
             throw new IllegalArgumentException("AuthenticationToken is not OAuth2 or JWT!");
         }
-        User user = getUser(attributes);
+        UserEntity user = getUser(attributes);
         user.setAuthorities(authToken.getAuthorities().stream()
             .map(GrantedAuthority::getAuthority)
             .map(authority -> {
@@ -209,8 +213,8 @@ public class UserService {
         return new UserDTO(syncUserWithIdP(attributes, user));
     }
 
-    private static User getUser(Map<String, Object> details) {
-        User user = new User();
+    private static UserEntity getUser(Map<String, Object> details) {
+        UserEntity user = new UserEntity();
         // handle resource server JWT, where sub claim is email and uid is ID
         if (details.get("uid") != null) {
             user.setId((String) details.get("uid"));
@@ -259,7 +263,7 @@ public class UserService {
         return user;
     }
 
-    private void clearUserCaches(User user) {
+    private void clearUserCaches(UserEntity user) {
         Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE)).evict(user.getLogin());
         if (user.getEmail() != null) {
             Objects.requireNonNull(cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE)).evict(user.getEmail());

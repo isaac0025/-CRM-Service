@@ -1,6 +1,6 @@
 package com.theagilemonkeys.repository;
 
-import com.theagilemonkeys.domain.User;
+import com.theagilemonkeys.domain.UserEntity;
 
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -15,31 +15,31 @@ import java.util.Optional;
 import java.time.Instant;
 
 /**
- * Spring Data JPA repository for the {@link User} entity.
+ * Spring Data JPA repository for the {@link UserEntity} entity.
  */
 @Repository
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository extends JpaRepository<UserEntity, String> {
 
     String USERS_BY_LOGIN_CACHE = "usersByLogin";
 
     String USERS_BY_EMAIL_CACHE = "usersByEmail";
 
-    Optional<User> findOneByEmailIgnoreCase(String email);
+    Optional<UserEntity> findOneByEmailIgnoreCase(String email);
 
-    Optional<User> findOneByLogin(String login);
+    Optional<UserEntity> findOneByLogin(String login);
 
 
 
     @EntityGraph(attributePaths = "authorities")
-    Optional<User> findOneWithAuthoritiesById(Long id);
+    Optional<UserEntity> findOneWithAuthoritiesById(Long id);
 
     @EntityGraph(attributePaths = "authorities")
     @Cacheable(cacheNames = USERS_BY_LOGIN_CACHE)
-    Optional<User> findOneWithAuthoritiesByLogin(String login);
+    Optional<UserEntity> findOneWithAuthoritiesByLogin(String login);
 
     @EntityGraph(attributePaths = "authorities")
     @Cacheable(cacheNames = USERS_BY_EMAIL_CACHE)
-    Optional<User> findOneWithAuthoritiesByEmailIgnoreCase(String email);
+    Optional<UserEntity> findOneWithAuthoritiesByEmailIgnoreCase(String email);
 
-    Page<User> findAllByLoginNot(Pageable pageable, String login);
+    Page<UserEntity> findAllByLoginNot(Pageable pageable, String login);
 }

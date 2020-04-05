@@ -39,9 +39,9 @@ public class CacheConfiguration {
         return cm -> {
             createCache(cm, com.theagilemonkeys.repository.UserRepository.USERS_BY_LOGIN_CACHE);
             createCache(cm, com.theagilemonkeys.repository.UserRepository.USERS_BY_EMAIL_CACHE);
-            createCache(cm, com.theagilemonkeys.domain.User.class.getName());
+            createCache(cm, com.theagilemonkeys.domain.UserEntity.class.getName());
             createCache(cm, com.theagilemonkeys.domain.Authority.class.getName());
-            createCache(cm, com.theagilemonkeys.domain.User.class.getName() + ".authorities");
+            createCache(cm, com.theagilemonkeys.domain.UserEntity.class.getName() + ".authorities");
             // jhipster-needle-ehcache-add-entry
         };
     }

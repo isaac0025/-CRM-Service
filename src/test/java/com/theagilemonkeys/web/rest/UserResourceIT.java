@@ -3,7 +3,7 @@ package com.theagilemonkeys.web.rest;
 import com.theagilemonkeys.CrmApp;
 import com.theagilemonkeys.config.TestSecurityConfiguration;
 import com.theagilemonkeys.domain.Authority;
-import com.theagilemonkeys.domain.User;
+import com.theagilemonkeys.domain.UserEntity;
 import com.theagilemonkeys.repository.UserRepository;
 import com.theagilemonkeys.security.AuthoritiesConstants;
 import com.theagilemonkeys.service.dto.UserDTO;
@@ -69,7 +69,7 @@ public class UserResourceIT {
     @Autowired
     private MockMvc restUserMockMvc;
 
-    private User user;
+    private UserEntity user;
 
     @BeforeEach
     public void setup() {
@@ -83,8 +83,8 @@ public class UserResourceIT {
      * This is a static method, as tests for other entities might also need it,
      * if they test an entity which has a required relationship to the User entity.
      */
-    public static User createEntity(EntityManager em) {
-        User user = new User();
+    public static UserEntity createEntity(EntityManager em) {
+        UserEntity user = new UserEntity();
         user.setId(UUID.randomUUID().toString());
         user.setLogin(DEFAULT_LOGIN + RandomStringUtils.randomAlphabetic(5));
         user.setActivated(true);
@@ -166,10 +166,10 @@ public class UserResourceIT {
     @Test
     @Transactional
     public void testUserEquals() throws Exception {
-        TestUtil.equalsVerifier(User.class);
-        User user1 = new User();
+        TestUtil.equalsVerifier(UserEntity.class);
+        UserEntity user1 = new UserEntity();
         user1.setId("id1");
-        User user2 = new User();
+        UserEntity user2 = new UserEntity();
         user2.setId(user1.getId());
         assertThat(user1).isEqualTo(user2);
         user2.setId("id2");
@@ -193,7 +193,7 @@ public class UserResourceIT {
         userDTO.setLastModifiedBy(DEFAULT_LOGIN);
         userDTO.setAuthorities(Collections.singleton(AuthoritiesConstants.USER));
 
-        User user = userMapper.userDTOToUser(userDTO);
+        UserEntity user = userMapper.userDTOToUser(userDTO);
         assertThat(user.getId()).isEqualTo(DEFAULT_ID);
         assertThat(user.getLogin()).isEqualTo(DEFAULT_LOGIN);
         assertThat(user.getFirstName()).isEqualTo(DEFAULT_FIRSTNAME);
@@ -263,7 +263,7 @@ public class UserResourceIT {
         assertThat(authorityA.hashCode()).isEqualTo(authorityB.hashCode());
     }
 
-    private void assertPersistedUsers(Consumer<List<User>> userAssertion) {
+    private void assertPersistedUsers(Consumer<List<UserEntity>> userAssertion) {
         userAssertion.accept(userRepository.findAll());
     }
 }

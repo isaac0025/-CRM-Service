@@ -1,6 +1,6 @@
 package com.theagilemonkeys.service.mapper;
 
-import com.theagilemonkeys.domain.User;
+import com.theagilemonkeys.domain.UserEntity;
 import com.theagilemonkeys.service.dto.UserDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,13 +21,13 @@ public class UserMapperTest {
     private static final String DEFAULT_ID = "id1";
 
     private UserMapper userMapper;
-    private User user;
+    private UserEntity user;
     private UserDTO userDto;
 
     @BeforeEach
     public void init() {
         userMapper = new UserMapper();
-        user = new User();
+        user = new UserEntity();
         user.setLogin(DEFAULT_LOGIN);
         user.setActivated(true);
         user.setEmail("johndoe@localhost");
@@ -41,7 +41,7 @@ public class UserMapperTest {
 
     @Test
     public void usersToUserDTOsShouldMapOnlyNonNullUsers() {
-        List<User> users = new ArrayList<>();
+        List<UserEntity> users = new ArrayList<>();
         users.add(user);
         users.add(null);
 
@@ -57,7 +57,7 @@ public class UserMapperTest {
         usersDto.add(userDto);
         usersDto.add(null);
 
-        List<User> users = userMapper.userDTOsToUsers(usersDto);
+        List<UserEntity> users = userMapper.userDTOsToUsers(usersDto);
 
         assertThat(users).isNotEmpty();
         assertThat(users).size().isEqualTo(1);
@@ -72,7 +72,7 @@ public class UserMapperTest {
         List<UserDTO> usersDto = new ArrayList<>();
         usersDto.add(userDto);
 
-        List<User> users = userMapper.userDTOsToUsers(usersDto);
+        List<UserEntity> users = userMapper.userDTOsToUsers(usersDto);
 
         assertThat(users).isNotEmpty();
         assertThat(users).size().isEqualTo(1);
@@ -88,7 +88,7 @@ public class UserMapperTest {
         List<UserDTO> usersDto = new ArrayList<>();
         usersDto.add(userDto);
 
-        List<User> users = userMapper.userDTOsToUsers(usersDto);
+        List<UserEntity> users = userMapper.userDTOsToUsers(usersDto);
 
         assertThat(users).isNotEmpty();
         assertThat(users).size().isEqualTo(1);
@@ -102,7 +102,7 @@ public class UserMapperTest {
         authoritiesAsString.add("ADMIN");
         userDto.setAuthorities(authoritiesAsString);
 
-        User user = userMapper.userDTOToUser(userDto);
+        UserEntity user = userMapper.userDTOToUser(userDto);
 
         assertThat(user).isNotNull();
         assertThat(user.getAuthorities()).isNotNull();
@@ -114,7 +114,7 @@ public class UserMapperTest {
     public void userDTOToUserMapWithNullAuthoritiesStringShouldReturnUserWithEmptyAuthorities() {
         userDto.setAuthorities(null);
 
-        User user = userMapper.userDTOToUser(userDto);
+        UserEntity user = userMapper.userDTOToUser(userDto);
 
         assertThat(user).isNotNull();
         assertThat(user.getAuthorities()).isNotNull();

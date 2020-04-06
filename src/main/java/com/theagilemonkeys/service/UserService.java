@@ -1,13 +1,10 @@
 package com.theagilemonkeys.service;
 
-import com.theagilemonkeys.config.Constants;
-import com.theagilemonkeys.domain.Authority;
-import com.theagilemonkeys.domain.UserEntity;
-import com.theagilemonkeys.repository.AuthorityRepository;
-import com.theagilemonkeys.repository.UserRepository;
-import com.theagilemonkeys.security.SecurityUtils;
-import com.theagilemonkeys.service.dto.UserDTO;
-import com.theagilemonkeys.service.mapper.UserMapper;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,8 +17,14 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import com.theagilemonkeys.config.Constants;
+import com.theagilemonkeys.domain.Authority;
+import com.theagilemonkeys.domain.UserEntity;
+import com.theagilemonkeys.repository.AuthorityRepository;
+import com.theagilemonkeys.repository.UserRepository;
+import com.theagilemonkeys.security.SecurityUtils;
+import com.theagilemonkeys.service.dto.UserDTO;
+import com.theagilemonkeys.service.mapper.UserMapper;
 
 /**
  * Service class for managing users.
@@ -56,7 +59,6 @@ public class UserService {
 				user.setEmail(email.toLowerCase());
 			}
 			user.setLangKey(langKey);
-			user.setImageUrl(imageUrl);
 			this.clearUserCaches(user);
 			log.debug("Changed Information for User: {}", user);
 		});
@@ -65,23 +67,7 @@ public class UserService {
 	public Optional<UserDTO> updateUser(UserDTO userDTO) {
 		return Optional.of(userRepository.findById(userDTO.getId())).filter(Optional::isPresent).map(Optional::get)
 				.map(user -> {
-					this.clearUserCaches(user);
-					user.setLogin(userDTO.getLogin().toLowerCase());
-					user.setFirstName(userDTO.getFirstName());
-					user.setLastName(userDTO.getLastName());
-					if (userDTO.getEmail() != null) {
-						user.setEmail(userDTO.getEmail().toLowerCase());
-					}
-					user.setImageUrl(userDTO.getImageUrl());
-					user.setActivated(userDTO.isActivated());
-					user.setLangKey(userDTO.getLangKey());
-					Set<Authority> managedAuthorities = user.getAuthorities();
-					managedAuthorities.clear();
-					userDTO.getAuthorities().stream().map(authorityRepository::findById).filter(Optional::isPresent)
-							.map(Optional::get).forEach(managedAuthorities::add);
-					this.clearUserCaches(user);
-					log.debug("Changed Information for User: {}", user);
-					return user;
+					return userRepository.saveAndFlush(user);
 				}).map(UserDTO::new);
 	}
 
@@ -140,25 +126,16 @@ public class UserService {
 	private static UserEntity getUser(Map<String, Object> details) {
 		UserEntity user = new UserEntity();
 		// handle resource server JWT, where sub claim is email and uid is ID
-		if (details.get("uid") != null) {
-			user.setId((String) details.get("uid"));
-			user.setLogin((String) details.get("sub"));
-		} else {
-			user.setId((String) details.get("sub"));
-		}
 		if (details.get("preferred_username") != null) {
 			user.setLogin(((String) details.get("preferred_username")).toLowerCase());
 		} else if (user.getLogin() == null) {
-			user.setLogin(user.getId());
+			user.setLogin((String) details.get("sub"));
 		}
 		if (details.get("given_name") != null) {
 			user.setFirstName((String) details.get("given_name"));
 		}
 		if (details.get("family_name") != null) {
 			user.setLastName((String) details.get("family_name"));
-		}
-		if (details.get("email_verified") != null) {
-			user.setActivated((Boolean) details.get("email_verified"));
 		}
 		if (details.get("email") != null) {
 			user.setEmail(((String) details.get("email")).toLowerCase());
@@ -180,10 +157,6 @@ public class UserService {
 			// set langKey to default if not specified by IdP
 			user.setLangKey(Constants.DEFAULT_LANGUAGE);
 		}
-		if (details.get("picture") != null) {
-			user.setImageUrl((String) details.get("picture"));
-		}
-		user.setActivated(false);
 		return user;
 	}
 

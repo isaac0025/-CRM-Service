@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<databaseChangeLog
+	xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd
+                        http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+	<changeSet author="" id="00000000000001-1">
+		<dropForeignKeyConstraint
+			baseTableName="jhi_user_authority" constraintName="fk_user_id" />
+			
+		<dropColumn columnName="activated" tableName="jhi_user">
+		</dropColumn>
+
+		<modifyDataType columnName="id" newDataType="BIGINT"
+			tableName="jhi_user" />
+
+		<renameTable newTableName="tb_user"
+			oldTableName="jhi_user" />
+
+		<createSequence sequenceName="seq_tb_user"
+			startValue="3" incrementBy="50" />
+	</changeSet>
+	<changeSet author="" id="00000000000001-2">
+		<renameTable newTableName="tb_user_authority"
+			oldTableName="jhi_user_authority" />
+
+
+		<modifyDataType columnName="user_id"
+			newDataType="BIGINT" tableName="tb_user_authority" />
+
+		<addForeignKeyConstraint
+			baseColumnNames="user_id" baseTableName="tb_user_authority"
+			constraintName="fk_user_id" referencedColumnNames="id"
+			referencedTableName="tb_user" />
+
+	</changeSet>
+</databaseChangeLog>

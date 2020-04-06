@@ -123,6 +123,12 @@ public class UserService {
 		}
 	}
 
+	public UserDTO createUser(UserDTO userDTO) {
+		UserEntity user = userMapper.userDTOToUser(userDTO);
+		userRepository.saveAndFlush(user);
+		return userMapper.userToUserDTO(user);
+	}
+
 	private static UserEntity getUser(Map<String, Object> details) {
 		UserEntity user = new UserEntity();
 		// handle resource server JWT, where sub claim is email and uid is ID

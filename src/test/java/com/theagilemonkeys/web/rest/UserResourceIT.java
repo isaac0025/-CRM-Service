@@ -1,19 +1,25 @@
 package com.theagilemonkeys.web.rest;
 
+import static com.theagilemonkeys.web.rest.TestUtil.ID_TOKEN;
+import static com.theagilemonkeys.web.rest.TestUtil.authenticationToken;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.Instant;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 
@@ -25,9 +31,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cache.CacheManager;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 
 import com.theagilemonkeys.CrmApp;
 import com.theagilemonkeys.config.TestSecurityConfiguration;
@@ -56,6 +67,8 @@ public class UserResourceIT {
 
 	private static final String DEFAULT_LANGKEY = "en";
 
+	private static final String ENDPOINT = "/api/users";
+
 	@Autowired
 	private UserRepository userRepository;
 
@@ -71,12 +84,31 @@ public class UserResourceIT {
 	@Autowired
 	private MockMvc restUserMockMvc;
 
+	@Autowired
+	private WebApplicationContext context;
+
 	private UserEntity user;
+
+	private OidcIdToken idToken;
 
 	@BeforeEach
 	public void setup() {
 		cacheManager.getCache(UserRepository.USERS_BY_LOGIN_CACHE).clear();
 		cacheManager.getCache(UserRepository.USERS_BY_EMAIL_CACHE).clear();
+	}
+
+	@BeforeEach
+	public void before() throws Exception {
+		Map<String, Object> claims = new HashMap<>();
+		claims.put("groups", Collections.singletonList("ROLE_ADMIN"));
+		claims.put("sub", 123);
+		this.idToken = new OidcIdToken(ID_TOKEN, Instant.now(), Instant.now().plusSeconds(60), claims);
+
+		SecurityContextHolder.getContext().setAuthentication(authenticationToken(idToken));
+		SecurityContextHolderAwareRequestFilter authInjector = new SecurityContextHolderAwareRequestFilter();
+		authInjector.afterPropertiesSet();
+
+		this.restUserMockMvc = MockMvcBuilders.webAppContextSetup(this.context).build();
 	}
 
 	/**
@@ -116,6 +148,26 @@ public class UserResourceIT {
 				.andExpect(jsonPath("$.[*].lastName").value(hasItem(DEFAULT_LASTNAME)))
 				.andExpect(jsonPath("$.[*].email").value(hasItem(DEFAULT_EMAIL)))
 				.andExpect(jsonPath("$.[*].langKey").value(hasItem(DEFAULT_LANGKEY)));
+	}
+
+	@Test
+	@Transactional
+	public void createUser() throws Exception {
+		int databaseSizeBeforeCreate = userRepository.findAll().size();
+		UserDTO source = userMapper.userToUserDTO(user);
+
+		restUserMockMvc.perform(post(ENDPOINT).contentType(MediaType.APPLICATION_JSON_VALUE)
+				.content(TestUtil.convertObjectToJsonBytes(source))).andExpect(status().isCreated());
+
+		List<UserEntity> userList = userRepository.findAll().stream()
+				.sorted((user1, user2) -> user2.getId().compareTo(user1.getId())).collect(Collectors.toList());
+		assertThat(userList).hasSize(databaseSizeBeforeCreate + 1);
+		UserEntity testUser = userList.get(0);
+		assertThat(testUser.getLogin()).isEqualTo(source.getLogin());
+		assertThat(testUser.getFirstName()).isEqualTo(source.getFirstName());
+		assertThat(testUser.getLastName()).isEqualTo(source.getLastName());
+		assertThat(testUser.getEmail()).isEqualTo(source.getEmail());
+
 	}
 
 	@Test

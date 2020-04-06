@@ -1,13 +1,9 @@
 package com.theagilemonkeys.web.rest;
 
-import com.theagilemonkeys.config.Constants;
-import com.theagilemonkeys.security.AuthoritiesConstants;
-import com.theagilemonkeys.service.UserService;
-import com.theagilemonkeys.service.dto.UserDTO;
+import java.net.URISyntaxException;
+import java.util.List;
 
-import io.github.jhipster.web.util.HeaderUtil;
-import io.github.jhipster.web.util.PaginationUtil;
-import io.github.jhipster.web.util.ResponseUtil;
+import javax.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,5 +64,12 @@ public class UserResource {
 	public ResponseEntity<UserDTO> getUser(@PathVariable String login) {
 		log.debug("REST request to get User : {}", login);
 		return ResponseUtil.wrapOrNotFound(userService.getUserWithAuthoritiesByLogin(login).map(UserDTO::new));
+	}
+
+	@PostMapping("/users")
+	public ResponseEntity<UserDTO> create(@Valid @RequestBody ManagedUserVM managedUserVM) throws URISyntaxException {
+		log.debug("REST request to create User : {}", managedUserVM.getLogin());
+		UserDTO newUser = userService.createUser(managedUserVM);
+		return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
 	}
 }

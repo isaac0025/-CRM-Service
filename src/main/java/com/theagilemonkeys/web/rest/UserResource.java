@@ -26,7 +26,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.theagilemonkeys.config.Constants;
-import com.theagilemonkeys.security.AuthoritiesConstants;
 import com.theagilemonkeys.service.UserService;
 import com.theagilemonkeys.service.dto.UserDTO;
 import com.theagilemonkeys.web.rest.vm.ManagedUserVM;
@@ -51,6 +50,7 @@ public class UserResource {
 	}
 
 	@GetMapping(USERS_ENDPOINT)
+	@PreAuthorize("@securityChecker.canListUsers(authentication)")
 	public ResponseEntity<List<UserDTO>> getAllUsers(Pageable pageable) {
 		final Page<UserDTO> page = userService.getAllManagedUsers(pageable);
 		HttpHeaders headers = PaginationUtil
@@ -59,12 +59,13 @@ public class UserResource {
 	}
 
 	@GetMapping(USERS_ENDPOINT + "/authorities")
-	@PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
+	@PreAuthorize("@securityChecker.canGetAuthorities(authentication)")
 	public List<String> getAuthorities() {
 		return userService.getAuthorities();
 	}
 
 	@GetMapping(USERS_ENDPOINT + "/{login:" + Constants.LOGIN_REGEX + "}")
+	@PreAuthorize("@securityChecker.canSearchUser(authentication)")
 	public ResponseEntity<UserDTO> getUser(@PathVariable String login) {
 		log.debug("REST request to get User : {}", login);
 		return ResponseUtil.wrapOrNotFound(userService.getUserWithAuthoritiesByLogin(login).map(UserDTO::new));

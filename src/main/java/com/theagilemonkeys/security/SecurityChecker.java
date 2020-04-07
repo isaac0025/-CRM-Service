@@ -19,6 +19,18 @@ public class SecurityChecker {
 		return this.isAdmin();
 	}
 
+	public boolean canSearchUser(Authentication authentication) {
+		return this.isAdmin();
+	}
+
+	public boolean canGetAuthorities(Authentication authentication) {
+		return this.isAdmin();
+	}
+
+	public boolean canListUsers(Authentication authentication) {
+		return this.isAdmin();
+	}
+
 	public boolean canUpdateUser(Authentication authentication) {
 		return this.isAdmin();
 	}
@@ -53,7 +65,7 @@ public class SecurityChecker {
 	}
 
 	private boolean isUser() {
-		return hasAuthority(AuthoritiesConstants.ADMIN);
+		return hasAuthority(AuthoritiesConstants.USER);
 
 	}
 

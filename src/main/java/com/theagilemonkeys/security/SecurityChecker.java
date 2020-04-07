@@ -27,6 +27,26 @@ public class SecurityChecker {
 		return this.isAdmin();
 	}
 
+	public boolean canSearchCustomer(Authentication authentication) {
+		return this.isAdmin() || this.isUser();
+	}
+
+	public boolean canListCustomers(Authentication authentication) {
+		return this.isAdmin() || this.isUser();
+	}
+
+	public boolean canCreateCustomer(Authentication authentication) {
+		return this.isAdmin() || this.isUser();
+	}
+
+	public boolean canUpdateCustomer(Authentication authentication) {
+		return this.isAdmin() || this.isUser();
+	}
+
+	public boolean canDeleteCustomer(Authentication authentication) {
+		return this.isAdmin() || this.isUser();
+	}
+
 	private boolean isAdmin() {
 		return hasAuthority(AuthoritiesConstants.ADMIN);
 

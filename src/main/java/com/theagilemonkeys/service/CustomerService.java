@@ -61,7 +61,7 @@ public class CustomerService {
 			return Optional.empty();
 		}
 
-		CustomerEntity newUser = customerMapper.customerDTOToCustomer(CustomerDTO);
+		CustomerEntity newUser = customerMapper.updateFromDTO(existingUser.get(), CustomerDTO);
 		newUser = customerRepository.saveAndFlush(newUser);
 		return Optional.ofNullable(customerMapper.customerToCustomerDTO(newUser));
 

@@ -50,6 +50,16 @@ public class UserMapper {
 		}
 	}
 
+	public UserEntity updateFromDTO(UserEntity user, UserDTO userDTO) {
+		user.setFirstName(userDTO.getFirstName());
+		user.setLastName(userDTO.getLastName());
+		user.setEmail(userDTO.getEmail());
+		user.setLangKey(userDTO.getLangKey());
+		Set<Authority> authorities = this.authoritiesFromStrings(userDTO.getAuthorities());
+		user.setAuthorities(authorities);
+		return user;
+	}
+
 	private Set<Authority> authoritiesFromStrings(Set<String> authoritiesAsString) {
 		Set<Authority> authorities = new HashSet<>();
 

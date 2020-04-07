@@ -43,6 +43,16 @@ public class CustomerMapper {
 		}
 	}
 
+	public CustomerEntity updateFromDTO(CustomerEntity customer, CustomerDTO CustomerDTO) {
+		customer.setId(CustomerDTO.getId());
+		customer.setImageUrl(CustomerDTO.getImageUrl());
+		customer.setFirstName(CustomerDTO.getFirstName());
+		customer.setLastName(CustomerDTO.getLastName());
+		customer.setEmail(CustomerDTO.getEmail());
+		customer.setLangKey(CustomerDTO.getLangKey());
+		return customer;
+	}
+
 	public CustomerEntity customerFromId(Long id) {
 		if (id == null) {
 			return null;

@@ -59,8 +59,7 @@ public class UserService {
 			return Optional.empty();
 		}
 
-		UserEntity newUser = userMapper.userDTOToUser(userDTO);
-		newUser.setLogin(existingUser.get().getLogin());
+		UserEntity newUser = userMapper.updateFromDTO(existingUser.get(), userDTO);
 		newUser = userRepository.saveAndFlush(newUser);
 		return Optional.ofNullable(userMapper.userToUserDTO(newUser));
 

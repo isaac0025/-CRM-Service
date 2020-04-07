@@ -21,3 +21,7 @@ services:
     extends:
       file: keycloak.yml
       service: keycloak
+  minio:
+    extends:
+      file: minio.yml
+      service: minio

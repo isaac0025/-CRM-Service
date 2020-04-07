@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.theagilemonkeys.service.CustomerService;
 import com.theagilemonkeys.service.dto.CustomerDTO;
@@ -87,5 +89,23 @@ public class CustomerResource {
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		customerService.delete(id);
 		return new ResponseEntity<>(HttpStatus.OK);
+	}
+
+	@PostMapping(USERS_ENDPOINT + "/{id}" + "/image")
+	@PreAuthorize("@securityChecker.canUpdateCustomer(authentication)")
+	public ResponseEntity<Void> create(@PathVariable Long id, @RequestParam("image") MultipartFile file)
+			throws Exception {
+		if (file.isEmpty()) {
+			return ResponseEntity.badRequest().body(null);
+		}
+
+		Optional<CustomerDTO> customer = customerService.uploadCustomerImage(id, file);
+
+		if (!customer.isPresent()) {
+			return ResponseEntity.badRequest().body(null);
+		}
+
+		return new ResponseEntity<>(HttpStatus.OK);
+
 	}
 }

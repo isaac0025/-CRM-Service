@@ -118,4 +118,8 @@ jhipster:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 
-# application:
+application:
+  minio:
+    endpoint: http://localhost:9050
+    access-key: AKIAIOSFODNN7EXAMPLE
+    secret-key: lPIh6FpTRUprKP9Z3Rp6s

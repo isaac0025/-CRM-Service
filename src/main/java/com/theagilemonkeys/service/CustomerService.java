@@ -7,11 +7,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import com.theagilemonkeys.config.ApplicationProperties;
 import com.theagilemonkeys.domain.CustomerEntity;
 import com.theagilemonkeys.repository.CustomerRepository;
 import com.theagilemonkeys.service.dto.CustomerDTO;
 import com.theagilemonkeys.service.mapper.CustomerMapper;
+
+import io.minio.MinioClient;
+import io.minio.PutObjectOptions;
+import liquibase.util.file.FilenameUtils;
 
 /**
  * Service class for managing customers.
@@ -26,9 +32,15 @@ public class CustomerService {
 
 	private final CustomerMapper customerMapper;
 
-	public CustomerService(CustomerRepository CustomerRepository, CustomerMapper customerMapper) {
+	private final ApplicationProperties applicationProperties;
+
+	private static final String MINIO_BUCKET_NAME = "customersimages";
+
+	public CustomerService(CustomerRepository CustomerRepository, CustomerMapper customerMapper,
+			ApplicationProperties applicationProperties) {
 		this.customerRepository = CustomerRepository;
 		this.customerMapper = customerMapper;
+		this.applicationProperties = applicationProperties;
 	}
 
 	public Optional<CustomerDTO> findById(Long id) {
@@ -72,6 +84,41 @@ public class CustomerService {
 		CustomerEntity user = customerMapper.customerDTOToCustomer(CustomerDTO);
 		user = customerRepository.saveAndFlush(user);
 		return customerMapper.customerToCustomerDTO(user);
+	}
+
+	public Optional<CustomerDTO> uploadCustomerImage(Long id, MultipartFile file) throws Exception {
+		Optional<CustomerEntity> customer = customerRepository.findById(id);
+		if (!customer.isPresent()) {
+			return Optional.empty();
+		}
+
+		try {
+			String filenameExtension = FilenameUtils.getExtension(file.getOriginalFilename());
+			String filename = id.toString() + "." + filenameExtension;
+			String imageUrl = uploadImage(filename, file);
+			customer.get().setImageUrl(imageUrl);
+			CustomerEntity updatedCustomer = customerRepository.saveAndFlush(customer.get());
+			return Optional.of(customerMapper.customerToCustomerDTO(updatedCustomer));
+		} catch (Exception e) {
+			log.error(e.getMessage());
+			throw e;
+		}
+
+	}
+
+	private String uploadImage(String filename, MultipartFile file) throws Exception {
+		MinioClient minioClient = new MinioClient(applicationProperties.getMinio().getEndpoint(),
+				applicationProperties.getMinio().getAccessKey(), applicationProperties.getMinio().getSecretKey());
+
+		boolean isExist = minioClient.bucketExists(MINIO_BUCKET_NAME);
+		if (!isExist) {
+			minioClient.makeBucket(MINIO_BUCKET_NAME);
+		}
+		minioClient.putObject(MINIO_BUCKET_NAME, filename, file.getInputStream(),
+				new PutObjectOptions(file.getInputStream().available(), -1));
+
+		return minioClient.getObjectUrl(MINIO_BUCKET_NAME, filename);
+
 	}
 
 }

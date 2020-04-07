@@ -15,5 +15,6 @@
 
     <include file="config/liquibase/changelog/00000000000000_initial_schema.xml" relativeToChangelogFile="false"/>
 	<include file="config/liquibase/changelog/00000000000001_updated_user_entity.xml" relativeToChangelogFile="false"/>
+	<include file="config/liquibase/changelog/00000000000002_created_customer_entity.xml" relativeToChangelogFile="false"/>
 
 </databaseChangeLog>

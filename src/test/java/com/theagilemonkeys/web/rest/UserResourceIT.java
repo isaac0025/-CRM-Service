@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -17,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -59,7 +61,7 @@ public class UserResourceIT {
 
 	private static final String DEFAULT_LOGIN = "johndoe";
 
-	private static final String ADMIN_LOGIN = "system";
+	private static final String ADMIN_LOGIN = "admin";
 
 	private static final String DEFAULT_EMAIL = "johndoe@localhost";
 
@@ -170,6 +172,42 @@ public class UserResourceIT {
 		assertThat(testUser.getFirstName()).isEqualTo(source.getFirstName());
 		assertThat(testUser.getLastName()).isEqualTo(source.getLastName());
 		assertThat(testUser.getEmail()).isEqualTo(source.getEmail());
+
+	}
+
+	@Test
+	@Transactional
+	public void updateUser() throws Exception {
+
+		Optional<UserEntity> user = userRepository.findOneByLogin(ADMIN_LOGIN);
+		assertThat(user.isPresent());
+
+		if (user.isPresent()) {
+			UserDTO updatedUserDTO = userMapper.userToUserDTO(user.get());
+			updatedUserDTO.setAuthorities(Collections.singleton(AuthoritiesConstants.USER));
+			updatedUserDTO.setLogin(DEFAULT_LOGIN);
+			updatedUserDTO.setFirstName(DEFAULT_FIRSTNAME);
+			updatedUserDTO.setLastName(DEFAULT_LASTNAME);
+			updatedUserDTO.setEmail(DEFAULT_EMAIL);
+
+			restUserMockMvc
+					.perform(put(ENDPOINT).contentType(MediaType.APPLICATION_JSON_VALUE)
+							.content(TestUtil.convertObjectToJsonBytes(updatedUserDTO)))
+					.andExpect(status().isCreated());
+
+			Optional<UserEntity> updatedUser = userRepository.findById(user.get().getId());
+			assertThat(updatedUser.isPresent());
+			if (updatedUser.isPresent()) {
+				assertThat(updatedUser.get().getLogin()).isEqualTo(ADMIN_LOGIN);
+				assertThat(updatedUser.get().getFirstName()).isEqualTo(updatedUserDTO.getFirstName());
+				assertThat(updatedUser.get().getLastName()).isEqualTo(updatedUserDTO.getLastName());
+				assertThat(updatedUser.get().getEmail()).isEqualTo(updatedUserDTO.getEmail());
+				assertThat(updatedUser.get().getAuthorities().stream().map(authority -> authority.getName())
+						.collect(Collectors.toSet()))
+								.isEqualTo((updatedUserDTO.getAuthorities().stream().collect(Collectors.toSet())));
+			}
+
+		}
 
 	}
 

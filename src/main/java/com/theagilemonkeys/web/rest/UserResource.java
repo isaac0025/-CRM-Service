@@ -2,6 +2,7 @@ package com.theagilemonkeys.web.rest;
 
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -17,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -36,6 +38,7 @@ import io.github.jhipster.web.util.ResponseUtil;
 public class UserResource {
 
 	private final Logger log = LoggerFactory.getLogger(UserResource.class);
+	private static final String USERS_ENDPOINT = "/users";
 
 	@Value("${jhipster.clientApp.name}")
 	private String applicationName;
@@ -46,7 +49,7 @@ public class UserResource {
 		this.userService = userService;
 	}
 
-	@GetMapping("/users")
+	@GetMapping(USERS_ENDPOINT)
 	public ResponseEntity<List<UserDTO>> getAllUsers(Pageable pageable) {
 		final Page<UserDTO> page = userService.getAllManagedUsers(pageable);
 		HttpHeaders headers = PaginationUtil
@@ -54,23 +57,36 @@ public class UserResource {
 		return new ResponseEntity<>(page.getContent(), headers, HttpStatus.OK);
 	}
 
-	@GetMapping("/users/authorities")
+	@GetMapping(USERS_ENDPOINT + "/authorities")
 	@PreAuthorize("hasAuthority(\"" + AuthoritiesConstants.ADMIN + "\")")
 	public List<String> getAuthorities() {
 		return userService.getAuthorities();
 	}
 
-	@GetMapping("/users/{login:" + Constants.LOGIN_REGEX + "}")
+	@GetMapping(USERS_ENDPOINT + "/{login:" + Constants.LOGIN_REGEX + "}")
 	public ResponseEntity<UserDTO> getUser(@PathVariable String login) {
 		log.debug("REST request to get User : {}", login);
 		return ResponseUtil.wrapOrNotFound(userService.getUserWithAuthoritiesByLogin(login).map(UserDTO::new));
 	}
 
-	@PostMapping("/users")
+	@PostMapping(USERS_ENDPOINT)
 	@PreAuthorize("@securityChecker.canCreateUser(authentication)")
 	public ResponseEntity<UserDTO> create(@Valid @RequestBody ManagedUserVM managedUserVM) throws URISyntaxException {
 		log.debug("REST request to create User : {}", managedUserVM.getLogin());
 		UserDTO newUser = userService.createUser(managedUserVM);
 		return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
+	}
+
+	@PutMapping(USERS_ENDPOINT)
+	@PreAuthorize("@securityChecker.canUpdateUser(authentication)")
+	public ResponseEntity<UserDTO> update(@Valid @RequestBody ManagedUserVM managedUserVM) {
+		log.debug("REST request to create User : {}", managedUserVM.getLogin());
+		Optional<UserDTO> updatedUser = userService.updateUser(managedUserVM);
+
+		if (updatedUser.isPresent()) {
+			return ResponseEntity.status(HttpStatus.CREATED).body(updatedUser.get());
+		} else {
+			return ResponseEntity.badRequest().body(null);
+		}
 	}
 }

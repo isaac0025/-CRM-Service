@@ -51,24 +51,19 @@ public class UserService {
 		this.userMapper = userMapper;
 	}
 
-	public void updateUser(String firstName, String lastName, String email, String langKey, String imageUrl) {
-		SecurityUtils.getCurrentUserLogin().flatMap(userRepository::findOneByLogin).ifPresent(user -> {
-			user.setFirstName(firstName);
-			user.setLastName(lastName);
-			if (email != null) {
-				user.setEmail(email.toLowerCase());
-			}
-			user.setLangKey(langKey);
-			this.clearUserCaches(user);
-			log.debug("Changed Information for User: {}", user);
-		});
-	}
-
 	public Optional<UserDTO> updateUser(UserDTO userDTO) {
-		return Optional.of(userRepository.findById(userDTO.getId())).filter(Optional::isPresent).map(Optional::get)
-				.map(user -> {
-					return userRepository.saveAndFlush(user);
-				}).map(UserDTO::new);
+
+		Optional<UserEntity> existingUser = userRepository.findById(userDTO.getId());
+
+		if (!existingUser.isPresent()) {
+			return Optional.empty();
+		}
+
+		UserEntity newUser = userMapper.userDTOToUser(userDTO);
+		newUser.setLogin(existingUser.get().getLogin());
+		newUser = userRepository.saveAndFlush(newUser);
+		return Optional.ofNullable(userMapper.userToUserDTO(newUser));
+
 	}
 
 	public void deleteUser(String login) {

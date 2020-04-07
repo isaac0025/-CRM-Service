@@ -19,6 +19,10 @@ public class SecurityChecker {
 		return this.isAdmin();
 	}
 
+	public boolean canUpdateUser(Authentication authentication) {
+		return this.isAdmin();
+	}
+
 	private boolean isAdmin() {
 		return hasAuthority(AuthoritiesConstants.ADMIN);
 

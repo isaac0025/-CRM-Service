@@ -5,6 +5,7 @@ import static com.theagilemonkeys.web.rest.TestUtil.authenticationToken;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -208,6 +209,18 @@ public class UserResourceIT {
 			}
 
 		}
+
+	}
+
+	@Test
+	@Transactional
+	public void deleteUser() throws Exception {
+
+		assertThat(userRepository.findOneByLogin(ADMIN_LOGIN).isPresent());
+
+		restUserMockMvc.perform(delete(ENDPOINT + "/{login}", ADMIN_LOGIN)).andExpect(status().isOk());
+
+		assertThat(!userRepository.findOneByLogin(ADMIN_LOGIN).isPresent());
 
 	}
 

@@ -23,6 +23,10 @@ public class SecurityChecker {
 		return this.isAdmin();
 	}
 
+	public boolean canDeleteUser(Authentication authentication) {
+		return this.isAdmin();
+	}
+
 	private boolean isAdmin() {
 		return hasAuthority(AuthoritiesConstants.ADMIN);
 

@@ -24,11 +24,11 @@ public class CustomerMapper {
 		return new CustomerDTO(user);
 	}
 
-	public List<CustomerEntity> CustomerDTOsToCustomers(List<CustomerDTO> CustomerDTOs) {
-		return CustomerDTOs.stream().filter(Objects::nonNull).map(this::CustomerDTOToCustomer).collect(Collectors.toList());
+	public List<CustomerEntity> customerDTOsToCustomers(List<CustomerDTO> CustomerDTOs) {
+		return CustomerDTOs.stream().filter(Objects::nonNull).map(this::customerDTOToCustomer).collect(Collectors.toList());
 	}
 
-	public CustomerEntity CustomerDTOToCustomer(CustomerDTO CustomerDTO) {
+	public CustomerEntity customerDTOToCustomer(CustomerDTO CustomerDTO) {
 		if (CustomerDTO == null) {
 			return null;
 		} else {

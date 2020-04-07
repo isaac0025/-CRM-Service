@@ -120,7 +120,7 @@ public class UserService {
 
 	public UserDTO createUser(UserDTO userDTO) {
 		UserEntity user = userMapper.userDTOToUser(userDTO);
-		userRepository.saveAndFlush(user);
+		user = userRepository.saveAndFlush(user);
 		return userMapper.userToUserDTO(user);
 	}
 

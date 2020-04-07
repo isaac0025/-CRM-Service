@@ -59,6 +59,8 @@ public class UserResourceIT {
 
 	private static final String DEFAULT_LOGIN = "johndoe";
 
+	private static final String ADMIN_LOGIN = "system";
+
 	private static final String DEFAULT_EMAIL = "johndoe@localhost";
 
 	private static final String DEFAULT_FIRSTNAME = "john";
@@ -101,7 +103,8 @@ public class UserResourceIT {
 	public void before() throws Exception {
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("groups", Collections.singletonList("ROLE_ADMIN"));
-		claims.put("sub", 123);
+		claims.put("sub", ADMIN_LOGIN);
+		claims.put("preferred_username", ADMIN_LOGIN);
 		this.idToken = new OidcIdToken(ID_TOKEN, Instant.now(), Instant.now().plusSeconds(60), claims);
 
 		SecurityContextHolder.getContext().setAuthentication(authenticationToken(idToken));

@@ -67,6 +67,7 @@ public class UserResource {
 	}
 
 	@PostMapping("/users")
+	@PreAuthorize("@securityChecker.canCreateUser(authentication)")
 	public ResponseEntity<UserDTO> create(@Valid @RequestBody ManagedUserVM managedUserVM) throws URISyntaxException {
 		log.debug("REST request to create User : {}", managedUserVM.getLogin());
 		UserDTO newUser = userService.createUser(managedUserVM);

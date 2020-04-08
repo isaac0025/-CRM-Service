@@ -59,9 +59,10 @@ public class UserService {
 			return Optional.empty();
 		}
 
-		UserEntity newUser = userMapper.updateFromDTO(existingUser.get(), userDTO);
-		newUser = userRepository.saveAndFlush(newUser);
-		return Optional.ofNullable(userMapper.userToUserDTO(newUser));
+		UserEntity updatedUser = userMapper.updateFromDTO(existingUser.get(), userDTO);
+		updatedUser = userRepository.saveAndFlush(updatedUser);
+		clearUserCaches(updatedUser);
+		return Optional.ofNullable(userMapper.userToUserDTO(updatedUser));
 
 	}
 

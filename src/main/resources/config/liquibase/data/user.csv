@@ -1,0 +1,3 @@
+id;login;first_name;last_name;email;image_url;activated;lang_key;created_by;last_modified_by
+1;admin;Admin;Admin;admin@localhost;;true;en;admin;admin
+2;user;User;User;user@localhost;;true;en;admin;admin

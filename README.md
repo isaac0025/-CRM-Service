@@ -90,3 +90,16 @@ For more information, refer to the [Code quality page][].
 ### Packaging as war
 
 To package your application as a war in order to deploy it to an application server, run:
+
+## Swagger UI
+
+In order to access swagger-ui you will need to have Node.js installed.
+
+Navigate to `src/main/webapp` and execute the following commands:
+
+```
+npm install
+npm start
+```
+
+Once the server has started, you can access swagger-ui by signing in and choosing the `API` option in the `Administration` tab.

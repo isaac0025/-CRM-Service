@@ -146,12 +146,4 @@ Desktop.ini
 ######################
 .eslintcache
 
-######################
-# Others
-######################
-/src/main/webapp/
-package.json
-angular.json
-/src/test/javascript/
-webpack
 

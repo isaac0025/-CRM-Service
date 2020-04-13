@@ -21,6 +21,13 @@ Then run:
 
     docker-compose -f src/main/docker/app.yml up -d
 
+After the container is created you will need to edit your /etc/hosts file adding the following lines:
+
+```
+127.0.0.1 keycloak
+127.0.0.1 minio
+```
+
 ### OAuth 2.0 / OpenID Connect
 
 This application is secured with OAuth 2.0 and uses [Keycloak](https://keycloak.org) as the authentication provider. You can start start Keycloak using the following command:

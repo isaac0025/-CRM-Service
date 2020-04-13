@@ -1,11 +1,11 @@
-version: '3.3'
+version: '2'
 services:
   minio:
     image: 'minio/minio'
     ports:
       - '9050:9000'
     volumes:
-      - minio:/data
+      - ./minio:/data
     command: server /data
     environment:
       MINIO_ACCESS_KEY: AKIAIOSFODNN7EXAMPLE

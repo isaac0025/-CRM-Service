@@ -3,7 +3,7 @@ services:
   minio:
     image: 'minio/minio'
     ports:
-      - '9050:9000'
+      - '9000:9000'
     volumes:
       - ./minio:/data
     command: server /data
